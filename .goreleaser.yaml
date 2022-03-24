@@ -1,0 +1,57 @@
+project_name: my_own_dapr
+builds:
+  - id: linux-darwin
+    main: ./cmd/daprd/main.go
+    binary: "{{ .ProjectName }}"
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -mod=readonly
+    ldflags:
+      - -w -s -X main.version={{ .Version }}
+  - id: windows-amd64
+    main: ./cmd/daprd/main.go
+    binary: "{{ .ProjectName }}"
+    goos:
+      - windows
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -mod=readonly
+    ldflags:
+      - -w -s -X main.version={{ .Version }}
+archives:
+  - id: my_own_dapr
+    builds:
+      - linux-darwin
+      - windows-amd64
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+release:
+  github:
+    owner: pkedy
+    name: my_own_dapr
+  prerelease: auto
+  draft: false
